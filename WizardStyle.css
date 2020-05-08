@@ -41,3 +41,11 @@ details {
 summary, .setAll {
   background-color: #F56600;
 }
+
+li {
+    margin-bottom: 2ex;
+}
+
+#vbutton {
+    background-colour: #F56600;
+}
