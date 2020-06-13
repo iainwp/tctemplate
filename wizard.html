@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <link rel="stylesheet" type="text/css" href="WizardStyle.css" />
+  <script src="WizardScript.js" defer="defer"></script>
 
   <!--Favicons-->
   <link rel="apple-touch-icon" type="image/png" href="favicon/noborder152.png" sizes="152x152" />
@@ -15,15 +16,10 @@
   <title>TCTemplate</title>
 </head>
 <body>
-  <script src="texlive.js/promisejs/promise.js" defer="defer"></script>
-  <script src="texlive.js/pdftex.js" defer="defer"></script>
-  <script src="WizardScript.js" defer="defer"></script>
-
   <header>
     <h1>TCTemplate: TrailO Timed Control Map Cards Generator</h1>
     <noscript>Enable Javascript for this wizard to work.</noscript>
-    <p id="missingAPIs">Web browser does not support required APIs. Need to update to newer browser to use this wizard.</p>
-    <p id="MSEdgeWarning">Your browser is not supported and errors may occur. Please update your browser.</p>
+    <p id="missingAPIs">Error: Web browser does not support required APIs. Need to update to newer browser to use TCTemplate.</p>
     <p class="right"><a href="help/index.html" target="help">Help</a>&emsp;<a href="index.html">Home</a></p>
   </header>
   <main id="mainView">
@@ -38,7 +34,7 @@
         <li>Set the print area for all courses (under the File menu) to have 0 margin, limit the printable area to the page size and untick <em>Set Print Area Automatically</em>. Select a paper size (custom size if necessary) that is large enough to include all parts of the map that are to be printed. Move the print area to cover all desired parts of the map and click done. (Each course/map does not need to have the same print area, although the author considers it easier to do so.)</li>
         <li>Create a single PDF of all the courses using File->Create PDFs->Courses and choosing to have one copy of each course all in a single PDF. Select all courses, including those not intended to be printed, but not the all controls map. Select <em>CMYK</em> as the colour model. Upload the maps PDF: <input type="file" id="coursePDFSelector" accept=".pdf" /></li>
         <li>Create a single PDF of all the control descriptions using File->Create PDFs->Descriptions. Choose fill one page with multiple copies of each course. Select all courses, including those not intended to be printed, but not the all controls. Choose a PDF printer with A4 page size. Leave the box size at the default of 6 mm, and leave the page margins at the default of 12.7 mm on all sides (appears as 13 mm in the main dialog). Upload the descriptions PDF: <input type="file" id="CDPDFSelector" accept=".pdf" /></li>
-        <li>Save the Purple Pen file, then upload it to this wizard: <input type="file" id="ppenSelector" accept=".ppen" onchange="tcTemplate.loadppen(this)" /><input type="button" value="Reload" onclick="tcTemplate.loadppen(document.getElementById('ppenSelector'))" /></li>
+        <li>Save the Purple Pen file, then upload it to this wizard: <input type="file" id="ppenSelector" accept=".ppen" onchange="tcTemplate.loadppen(this)" /><input type="button" value="Reload" onclick="tcTemplate.loadppen(document.getElementById('ppenSelector'))" /> <span id="ppenStatus"></span></li>
       </ol>
     </section>
 
@@ -64,7 +60,7 @@
       </details>
 
       <ul>
-        <li>Open station data: <input type="file" id="texSelector" accept=".tex" onchange="tcTemplate.loadTeX(this)" /><input type="button" value="Reload" onclick="tcTemplate.loadTeX(document.getElementById('texSelector'))" /></li>
+        <li>Open station data: <input type="file" id="texSelector" accept=".tex" onchange="tcTemplate.loadTeX(this)" /><input type="button" value="Reload" onclick="tcTemplate.loadTeX(document.getElementById('texSelector'))" /> <span id="texReadStatus"></span></li>
         <li><input type="button" value="Save station data" onclick="tcTemplate.saveParameters()" />&emsp;<input id="autoSave" type="checkbox" checked="checked" />Automatically save a copy when generating map cards</li>
       </ul>
 
@@ -157,11 +153,16 @@
       <ol start="12">
         <li>Select template
           <select id="selectTemplate">
-            <option value="printA5onA4">Print 2 × A5 cards on A4 paper</option>
-            <option value="YQTempO">TempO Simulator</option>
+            <option value="printA5onA4" selected="selected">Print 2 × A5 cards on A4 paper</option>
+            <option value="onlineTempO">Online TempO</option>
           </select>
         </li>
-        <li><input id="compileLaTeXBtn" type="button" value="Generate map cards" onclick="tcTemplate.generatePDF(this)" />&ensp;<span id="compileStatus"></span> <a id="savePDF" download="TCMapCards.pdf">Save map cards PDF again</a> <a id="viewLog" target="log">View debug log</a></li>
+        <li>
+          <button id="compileLaTeXBtn" type="button">Generate map cards</button>
+          <span id="compileStatus"></span>
+          <a id="savePDF">Save map cards again</a>
+          <a id="viewLog">Save debug log</a>
+        </li>
       </ol>
       <ol id="printInstructions" start="14">
         <li>Print the produced PDF file on A4 paper in colour and single-sided. Make sure the scale is set to 100%; do not fit to page. See <a href="help/printingadjustments.html" target="help">instructions for professional printing</a>.</li>
@@ -169,17 +170,16 @@
         <li>Laminate the cards. Keep the plastic rectangular, except for rounded corners; do not cut out the notches on the right hand side. Make sure the plastic is sealed; there must be a few mm between the edge of the paper and the plastic card.</li>
         <li>Have a successful competition!</li>
       </ol>
-      <div id="yqTempOInstructions">
-        These instructions are are adapted from those by <a href="https://github.com/iainwp/tctemplate/tree/temposim" target="repo">ianwp</a>. You will need <a href="https://imagemagick.org" target="prerequisites">ImageMagick</a> and a full distribution of <a href="https://www.tug.org/texlive/" target="prerequisites">TeX Live</a>.
+      <div id="onlineInstructions">
         <ol start="14">
-          <li>Run the <a href="https://www.python.org/downloads/" target="prerequisites">Python 3</a> script <a href="temposimconvert.py" download="temposimconvert.py">temposimconvert</a>.</li>
+          <li>Unzip the files.</li>
           <li>Upload the files into <a href="http://www.yq.cz/trail-o/TempO/" target="prerequisites">TempO Simulator</a>.</li>
         </ol>
       </div>
     </section>
   </main>
   <footer>
-    <p class="right">Last updated (UTC): 30<sup>th</sup> May 2020 13:24</p>
+    <p class="right">Last updated (UTC): 10<sup>th</sup> June 2020 17:00</p>
     <p class="right">Copyright (c) 2017-20 TCTemplate contributors, maintained by Tom Dobra: <a href="help/license.html" target="help">view license</a></p>
   </footer>
 </body>
